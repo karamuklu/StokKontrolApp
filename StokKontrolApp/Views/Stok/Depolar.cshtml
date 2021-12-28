@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+
+<center>
+    <h2>Depo Durum Sorgula</h2>
+</center>
+<div class="row">
+    <div class="col-xs-12">
+        <hr />
+        <center>
+            <input type="text" name="stokKodu" id="stokKodu" placeholder="Ürün kodunu giriniz" class="form-control" />
+        </center>
+        <br />
+        <center>
+            <input type="button" id="urunGetir" value="Ürünü Getir" class="btn btn-warning al" />
+        </center>
+        <br />
+    </div>
+    <div class=" col-xs-12">
+        <div id="urun"> </div>
+    </div>
+</div>
+<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script>
+    $('input[name=Ara]').click(function (e) {
+        if ($('#id').val() == "") {
+            e.preventDefault();
+            alert('Lütfen değer giriniz');
+        }
+    });
+
+    $().ready(function () {
+        $('#urunGetir').click(function (e) {
+            if ($('#stokKodu').val() == "") {
+                e.preventDefault();
+                alert('Lütfen stok kodu giriniz');
+            }
+            else {
+                $('#urun').html(' <div class="row"><div class="col-xs-12"><table id="urunTablosu" class="table table-bordered table-condensed table-responsive table-striped table-hover"><tr><th style="font-size:9px">Stok Kodu</th><th style="font-size:9px">Stok Adı</th><th style="font-size:8px">K_GRUP_KODU</th><th align="center" style="font-size:8px">K_DETAY_KODU</th><th align="center"style="font-size:8px">TOPLAM_DEPOLAR</th><th align="center"style="font-size:8px">TOPLAM_SIPARIS_K</th><th align="center"style="font-size:8px">TOPLAM_SIPARIS_P</th><th align="center"style="font-size:8px">SEVK_BEKLEYEN_SIPARISLER</th><th align="center"style="font-size:8px">TOPLAM_REZERVE_SIPARIS</th><th align="center"style="font-size:8px">SERBEST_BAKIYE</th><th align="center"style="font-size:8px">DIS_ALIM_SIPARIS_BOLU_ISEMRI</th><th align="center"style="font-size:8px">REZERVE_PAZARLAMA</th><th align="center"style="font-size:8px">PAZARLAMA_SIPARIS_K</th><th align="center"style="font-size:8px">PAZARLAMA_SIPARIS_P</th><th align="center"style="font-size:8px">PAZARLAMA_SEVK_BEKLEYEN</th></tr ></table ></div ></div > ');
+
+
+                //dönen veri list tipinde, foreach kullanarak ekrana basarsak işlem tamam
+                $.getJSON('http://localhost:56784/api/stok/GetStokBakiyeDepolarAyri/' + $('#stokKodu').val(), function (veri) {
+                    for (var i = 0; i < veri.length; i++) {
+                        var stokBilgisi = '<tr><td style="font-size:9px">' + veri[i].K_STOK_KODU + '</td><td style="font-size:9px">' + veri[i].K_STOK_ADI + '</td><td align="center"style="font-size:8px">' + veri[i].K_GRUP_KODU + '</td><td align="center"style="font-size:8px">' + veri[i].K_DETAY_KODU + '</td><td align="center"style="font-size:8px">' + veri[i].TOPLAM_DEPOLAR + '</td><td align="center"style="font-size:8px">' + veri[i].TOPLAM_SIPARIS_K + '</td><td align="center"style="font-size:8px">' + veri[i].TOPLAM_SIPARIS_P + '</td><td align="center"style="font-size:8px">' + veri[i].SEVK_BEKLEYEN_SIPARISLER + '</td><td align="center"style="font-size:8px">' + veri[i].TOPLAM_REZERVE_SIPARIS + '</td><td align="center"style="font-size:8px">' + veri[i].SERBEST_BAKIYE + '</td><td align="center"style="font-size:8px">' + veri[i].DIS_ALIM_SIPARIS_BOLU_ISEMRI + '</td><td align="center"style="font-size:8px">' + veri[i].REZERVE_PAZARLAMA + '</td><td align="center"style="font-size:8px">' + veri[i].PAZARLAMA_SIPARIS_K + '</td><td align="center"style="font-size:8px">' + veri[i].PAZARLAMA_SIPARIS_P + '</td><td align="center"style="font-size:8px">' + veri[i].PAZARLAMA_SEVK_BEKLEYEN + '</td>  </tr >'                       
+                    
+                        $('#urunTablosu').append(stokBilgisi);
+                    }
+                    console.log(veri)
+                });
+            }
+        });
+    });
+</script>
+
+
+
+
+@*$.getJSON('http://localhost:56784/api/stok/' + $('#stokKodu').val(), function (veri) {
+                    var stokBilgisi = '<tr><td>' + veri.STOK_KODU + '</td><td>' + veri.STOK_ADI + '</td><td align="center">' + veri.SERBESTSTOK + '</td><td align="center">' + veri.SIPARISBAKIYE + '</td><td align="center">' + veri.BEKLEMEGUNU + '</td></tr>'
+                    $('#urunTablosu').append(stokBilgisi);
+                    console.log(veri)
+                });*@

@@ -1,0 +1,63 @@
+﻿@model IEnumerable<UrunKontrolWebApi.Entities.SEPET_MKA>
+@using GridMvc.Html
+
+@{
+    ViewBag.Title = "Sepet Listesi";
+}
+
+<h2 class="text-center">Sepet Detay Bilgisi</h2>
+<br />
+<div class="row">
+    <a href="/Stok/SepetUstList" class="btn btn-success">Geri</a>
+
+</div>
+<br />
+
+<div class="row">
+    @Html.Grid(Model).Columns(column=> {
+
+    column.Add(m => m.TARIH).Sanitized(false).Encoded(false).Titled("TARİH").Format("{0:dd/MM/yyyy}").SetWidth(20).Css("text-center");
+    column.Add(m => m.SEPETID).Sanitized(false).Encoded(false).Titled("SEPET NO").Css("text-center");
+    column.Add(m => m.STOK_KODU).RenderValueAs(i=>i.STOK_KODU).Sanitized(false).Encoded(false).Titled("STOK KODU").Filterable(true).Sortable(true).Css("text-center");
+    column.Add(m => m.STOK_ADI).Titled("STOK ADI").Filterable(true).Sortable(true).Css("text-center");
+    column.Add(m => m.MIKTAR).Sanitized(false).Encoded(false).Titled("MİKTAR").Css("text-center");
+    //column.Add(m => m.FIYAT).Sanitized(false).Encoded(false).Titled("FİYAT");
+    column.Add().Titled("FİYAT").Encoded(false).Sanitized(false).RenderValueAs(html =>
+    {
+        string htmlStr = "<input type='text' name='fiyat" + html.SATIS_FIYAT.ToString() + "' id='fiyat" + html.SATIS_FIYAT.ToString() + "' value='"+html.SATIS_FIYAT.ToString("c")+ "' placeholder='" + html.SATIS_FIYAT+ "' class='form-control'/>";
+        return MvcHtmlString.Create(htmlStr);
+    });
+   
+
+
+
+    column.Add().Titled("İSKONTO").Encoded(false).Sanitized(false).RenderValueAs(html =>
+    {
+        string htmlStr = "<input type='text' name='cariKodu" + html.ISKONTO.ToString() + "' id='cariKodu" + html.ISKONTO.ToString() + "' value='" + html.ISKONTO + "'        placeholder='" + html.ISKONTO + "' class='form-control' />";
+        return MvcHtmlString.Create(htmlStr);
+    });
+    
+    column.Add(m => m.TOPLAMFIYAT).Sanitized(false).Encoded(false).Titled("İSK. TOP. FIYAT").Format("{0:c}").Css("text-center");
+    column.Add(m => m.DEPO_KODU).Sanitized(false).Encoded(false).Titled("DEPO KODU").Filterable(true).Css("text-center");
+    column.Add(m => m.ISIM).Sanitized(false).Encoded(false).Titled("İSİM").Css("text-center");
+    column.Add(m => m.SOYISIM).Sanitized(false).Encoded(false).Titled("SOYİSİM").Css("text-center");
+    column.Add().Encoded(false).Sanitized(false).RenderValueAs(o => Html.ActionLink("Sil", "SepettenSil", "Stok",new {id=o.STOK_KODU,sepetNo=o.SEPETID, siraNo=o.SIRA }, new { @class = "btn btn-primary", name = "Sil" + o.SEPETID, id = "Sil" + o.SEPETID }));
+
+
+}).WithPaging(10)
+</div>
+<br />
+<div class="row">
+    <h2 class="text-center">Sepet Toplamı: <b>@Model.Sum(i => i.TOPLAMFIYAT).ToString("c")</b></h2>
+</div>
+<br />
+<div class="row">
+    <a href="/Stok/SepetUstList" class="btn btn-success">Geri</a>
+</div>
+
+<script>
+    
+  
+
+
+</script>

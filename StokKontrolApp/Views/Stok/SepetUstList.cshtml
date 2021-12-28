@@ -1,0 +1,126 @@
+﻿@model IEnumerable<UrunKontrolWebApi.Entities.SEPETUST_MKA>
+@using GridMvc.Html
+@{
+    ViewBag.Title = "Sepet Üst Listesi";
+}
+
+
+<h2 class="text-capitalize text-center">Sepet Özet Listesi</h2>
+
+<br />
+
+<br />
+<div class="row">
+    @Html.Grid(Model).Columns(column=> {
+
+   column.Add(m => m.TARIH).Sanitized(false).Encoded(false).Titled("TARİH").Format("{0:dd/MM/yyyy}").SetWidth(20).Css("text-center");
+   column.Add(m => m.SEPETID).Sanitized(false).Encoded(false).Titled("SEPET NO").Css("text-center").Filterable(true).Sortable(true);
+   column.Add(m => m.KULLANICI_ADI).RenderValueAs(i=>i.KULLANICI_ADI).Sanitized(false).Encoded(false).Titled("KULLANICI ADI").Css("text-center");
+   column.Add(m => m.NETSISDURUMU).Titled("NETSIS DURUMU").Filterable(true).Sortable(true).Css("text-center");
+   column.Add(m => m.GENELTOPLAM).Sanitized(false).Encoded(false).Titled("GENELTOPLAM").Css("text-center").Format("{0:c}");
+   //column.Add(m => m.FIYAT).Sanitized(false).Encoded(false).Titled("FİYAT");
+
+   column.Add().Titled("CARİ KODU").Encoded(false).Sanitized(false).RenderValueAs(html =>
+   {
+       string htmlStr = "<input type='text' name='cariKodu" + html.CARI_KODU + "' id='cariKodu" + html.CARI_KODU + "' value='" + html.CARI_KODU + "' placeholder='" + html.CARI_KODU + "' class='form-control'> ";
+       return MvcHtmlString.Create(htmlStr);
+   });
+
+   column.Add().Titled("CARİ - AÇIKLAMA").Encoded(false).Sanitized(false).RenderValueAs(html =>
+   {
+       string htmlStr = "<input type='button' id='cariGuncelle' value='Cari Güncelle' class='btn btn-danger'> ";
+       return MvcHtmlString.Create(htmlStr);
+   });
+
+
+   column.Add().Titled("SEPET DETAY").Encoded(false).Sanitized(false).RenderValueAs(o => Html.ActionLink("Detaya Git", "SepetList", "Stok",new {id=o.SEPETID}, new { @class = "btn btn-warning", name = "Sepet" + o.SEPETID, id = "Sepet" + o.SEPETID })); }).WithPaging(10)
+</div>
+<br />
+<br />
+
+
+<script>
+    $().ready(function () {
+          $.ajax({
+            url : 'SepetUstList',
+                type:'POST',
+                dataType:'json',
+                success:function(veri){
+                    for (var i = 0; i < veri.length; i++) {
+                        var sepetBilgisi = '<tr><td id="TARIH" class="text-center">' + veri[i].TARIH + '</td><td id="SEPETID" class="text-center">' + veri[i].SEPETID + '</td><td class="text-center" id="ISIM">' + veri[i].ISIM + '</td><td class="text-center" id="SOYISIM">' + veri[i].SOYISIM + '</td><td class="text-center" id="NETSISDURUMU">' + veri[i].NETSISDURUMU + '</td><td class="text-center" id="GENELTOPLAM">' + veri[i].GENELTOPLAM + '</td><td class="text-center" id="CARI_KODU">' + veri[i].CARI_KODU + '</td><td><input type="text" name="carikodu' + (i + 1) + '" id="carikodu' + (i + 1) + '" placeholder="Cari Kodu veya Açıklama" class="form-control"> </td> <td>   <input type="button" id="cariGuncelle" value="Cari Güncelle" class="btn btn-danger"></td><td><a href="/Stok/SepetList/' + veri[i].SEPETID + '" class="btn btn-warning">Sepet Detay</a></td></tr > '
+                        $('#urunTablosu').append(sepetBilgisi);}  }
+            });
+        });
+
+  $("body").on("click", "#cariGuncelle", function () {
+
+            var currentRow = $(this).closest("tr");
+            var col0 = currentRow.find("td:eq(0)").text(); // get current row 1. TD value
+            var col1 = currentRow.find("td:eq(1)").text(); // get current row 2. TD value
+            var col2 = currentRow.find("td:eq(2)").text(); // get current row 3. TD value
+            var col3 = currentRow.find("td:eq(3)").text(); // get current row 4. TD value
+            var col4 = currentRow.find("td:eq(4)").text(); // get current row 5. TD value
+            var col5 = currentRow.find("td:eq(5) input[type='text']").val(); // get current row 3rd TD
+            var col6 = currentRow.find("td:eq(6) input[type='text']").val();
+            var col7 = currentRow.find("td:eq(7) input[type='text']").val();// get current row 3rd TD
+            var col8 = currentRow.find("td:eq(8) input[type='text']").val();// get current row 3rd TD
+            var data = "Kolon0 " + col0 + "\n" + "Kolon1 " + col1 + "\n" + "Kolon2 " + col2 + "\n" + "Kolon3 " + col3 + "\n" + "Kolon4 " + col4 + "\n" + "Kolon5 " + col5 + "\n" + "Kolon6 " + col6;
+
+            //console.log('Kullanici ID :'kayitYapanID)
+
+            var obj = {
+                SEPETID: col1,
+                cari_kodu: col5
+            };
+        console.log(obj)
+
+                 //alert(data)
+
+            $.ajax({
+                type: 'POST',
+                url: 'SepeteUstGuncelle',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(obj),
+                success: function (gelenveri) {
+                //alert("Güncellendi")
+                location.reload()
+                },
+                error: function (hata) {
+                alert("Hata Oluştu")
+                }
+        });
+
+    });
+
+</script>
+
+@*<form action="/Stok/Guncelle/@Model.Se" method="post">
+        <div class="panel-heading">
+            <h3 class="panel-title">Yorum Yap</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                <input type="text" name="YorumBaslik" placeholder="Başlık" class="form-control" />
+            </p>
+            <p class="text-right">
+                <textarea name="YorumIcerik" placeholder="Yorum Giriniz" class="form-control" rows="3"> </textarea>
+            </p>
+            <input type="submit" value="Kaydet" class="btn btn-primary" />
+        </div>
+    </form>*@
+
+@*@Html.Grid(Model).Columns(column=> {
+
+    column.Add(m => m.TARIH).Titled("TARIH").Css("table table-bordered table-condensed table-striped table-hover").Format("{0:dd/MM/yyyy}").SetWidth(30);
+    column.Add(m => m.SEPETNO).Titled("SEPETNO").Sortable(true).Filterable(true).Css("table table-bordered table-condensed table-striped table-hover");
+    column.Add(m => m.ISIM).Titled("ISIM").Css("table table-bordered table-condensed table-striped table-hover");
+    column.Add(m => m.SOYISIM).Titled("SOYISIM").Css("table table-bordered table-condensed table-striped table-hover");
+    column.Add().Encoded(false).Sanitized(false).RenderValueAs(html =>
+    {
+        string htmlStr = "<input type='text' name='cariKodu" + html.SEPETNO.ToString() + "' id='cariKodu" + html.SEPETNO.ToString() + "' placeholder='Cari Kodu' class='form - control'/>";
+        return MvcHtmlString.Create(htmlStr);
+    });
+
+    column.Add(m => m.NETSISDURUMU).Titled("NETSIS DURUMU").Css("table table-bordered table-condensed table-striped table-hover");
+    column.Add().Encoded(false).Sanitized(false).RenderValueAs(o => Html.ActionLink(null, null, null, new { @class = "btn btn-primary",name="Guncelle"+o.SEPETNO,id= "Guncelle" + o.SEPETNO,onclick="myFunction()" }));}).WithPaging(10)*@
+

@@ -1,0 +1,146 @@
+﻿
+
+@{
+    ViewBag.Title = "Index";
+
+}
+
+
+<center>
+    <h2>Stok Durum Sorgula</h2>
+</center>
+
+<p>
+    @if (Session["Kullanıcı"] == null)
+    {
+        <label class="label label-danger">Kullanıcı:Yok</label>
+
+        Response.Redirect("/Login/Index");
+
+    }
+ </p>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-12">
+                <a href="Stok/SepetUstList" class="btn btn-success">Sipariş Listesi için tıklayınız</a>
+            </div>
+        </div> 
+
+        <hr />
+        <center>
+            <input type="text" name="stokKodu" id="stokKodu" placeholder="Ürün kodunu giriniz" class="form-control" />
+        </center>
+        <br />
+        <center>
+            <input type="button" id="urunGetir" value="Ürünü Getir" class="btn btn-warning al">
+        </center>
+        <br />
+    </div>
+    <div class=" col-xs-12">
+        <div id="urun"> </div>
+    </div>
+</div>
+<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script>
+    $('input[name=Ara]').click(function (e) {
+        if ($('#id').val() == "") {
+            e.preventDefault();
+            alert('Lütfen değer giriniz');
+        }
+    });
+
+    $().ready(function () {
+        var sayi = 0;
+        $('#urunGetir').click(function (e) {
+            if ($('#stokKodu').val() == "") {
+                e.preventDefault();
+                alert('Lütfen stok kodu giriniz');
+            }
+            else {
+                $('#urun').html(' <div class="row"><div class="col-xs-12"><table id="urunTablosu" class="table table-bordered table-condensed table-striped table-hover"><tr><th>Stok Kodu</th><th>Stok Adı</th><th align="center">Depo Bakiyesi</th><th align="center">Serbest Stok</th><th align="center">Depo Kodu</th><th>Sipariş Mik.</th><th>Satış Fiyatı</th></tr></table></div></div>');
+
+                $.getJSON('http://localhost:61358/api/urun/GetStokBakiyeAdaGore/' + $('#stokKodu').val(), function (veri) {
+                    for (var i = 0; i < veri.length; i++) {
+                        var stokBilgisi = '<tr> <td id="stok_Kodu" name="stok_kodu">' + veri[i].STOK_KODU + '</td><td id="stok_Adi">' + veri[i].STOK_ADI + '</td><td align="center" id="depoBakiye">' + veri[i].DEPOBAKIYE + '</td><td align="center" id="serbestStok">' + veri[i].SERBESTSTOK + '</td><td align="center" id="depoAdi">' + veri[i].DEPO_ADI + '</td><td hidden="hidden" id="depoKodu">' + veri[i].DEPO_KODU + '</td><td><input type="text" name="miktar' + (i + 1) + '" id="miktar' + (i + 1) + '" placeholder="Sipariş Mik. " class="form-control"> </td> <td align="center" id="satis_fiyat">' + veri[i].SATIS_FIYAT + '</td><td>   <input type="button" id="urunEkle" value="Ekle" class="btn btn-danger"></td ></tr > '
+                        $('#urunTablosu').append(stokBilgisi);
+                        sayi = sayi + i;
+    //console.log("siraNo:"+sayi)
+                    }
+                    //console.log(veri)
+                });
+            }
+        });
+
+
+        $("body").on("click", "#urunEkle", function () {
+            //var sayi = 1;
+
+            var currentRow = $(this).closest("tr");
+            var col0 = currentRow.find("td:eq(0)").text(); // get current row 1st TD value
+            var col1 = currentRow.find("td:eq(1)").text(); // get current row 1st TD value
+            var col2 = currentRow.find("td:eq(2)").text(); // get current row 2nd TD
+            var col3 = currentRow.find("td:eq(3)").text(); // get current row 3rd TD
+            var col4 = currentRow.find("td:eq(4)").text(); // get current row 3rd TD
+            var col5 = currentRow.find("td:eq(5)").text(); // get current row 3rd TD
+            var col6 = currentRow.find("td:eq(6) input[type='text']").val(); // get current row 3rd TD
+            var col7 = currentRow.find("td:eq(7)").text(); // get current row 3rd TD
+            var data = "Kolon0 " + col0 + "\n" + "Kolon1 " + col1 + "\n" + "Kolon2 " + col2 + "\n" + "Kolon3 " + col3 + "\n" + "Kolon4 " + col4 + "\n" + "Kolon5 " + col5 + "\n" + "Kolon6 " + col6+ "\n" + "Kolon7 " + col7;
+
+            var kayitYapanID = @Session["KullaniciId"]
+            var sepetID = @Session["YeniSepetId"]
+
+            //console.log('Kullanici ID :'kayitYapanID)
+
+            var obj = {
+                stok_kodu: col0,
+                miktar: col6,
+                depo_kodu: col5,
+                kayityapankul: kayitYapanID,
+                SepetID: sepetID,
+                SATIS_FIYAT:col7
+            };
+            //alert(data)
+            console.log(obj)
+            //console.log(data)
+
+
+            $.ajax({
+                type: 'POST',
+                url: '/Stok/SepeteEkle',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(obj),
+                success: function (gelenveri) {
+                    //alert("Eklendi")
+                },
+                error: function (hata) {
+                    alert("Sepet kalem eklenmesinde Hata Oluştu")
+                }
+            });
+
+            var sepetUstBilgi = {
+                sepetid:    @Session["YeniSepetId"],
+                kayityapankul: @Session["KullaniciId"],
+                geneloplam:0
+            };
+            
+            console.log(sepetUstBilgi)
+            $.ajax({
+                type:'POST',
+                url: 'Stok/SepeteUstEkle',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(sepetUstBilgi),
+                success: function (gelenveri) {
+                    //alert("Eklendi")
+                },
+                error: function (hata) {
+                    alert("Sepet üst bilgi eklenmesinde Hata Oluştu")
+                }
+            });
+        });
+
+
+    });
+</script>
+
